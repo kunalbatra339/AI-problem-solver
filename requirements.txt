@@ -4,11 +4,10 @@ pymongo==4.7.3
 requests==2.32.3
 werkzeug==3.0.3
 gunicorn==22.0.0
-python-dotenv==1.0.1 # For loading .env file during local development
+python-dotenv==1.0.1
 
-# Core ML/AI Libraries - Pinned versions for consistency and deployment
 torch==2.5.0
 torchvision==0.22.1
 numpy==2.3.1
 opencv-python==4.9.0.80
-Pillow==9.5.0 # UPDATED: Downgraded to 9.5.0 for build compatibility
+Pillow==9.0.0 # Updated
