@@ -17,8 +17,7 @@ from torchvision import models, transforms # Import models and transforms from t
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app) # Enable CORS for all routes
-
+CORS(app, resources={r"/*": {"origins": "https://ai-problem-solver-beta.vercel.app"}})
 # --- MongoDB Configuration ---
 # Get MONGO_URI from environment variables, default to localhost for local dev
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/micro_problem_db")
