@@ -1,0 +1,31 @@
+# Python-specific ignores
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python/
+env/
+venv/                  # Ignore the virtual environment folder (if at root or any subfolder)
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Node.js / Frontend-specific ignores
+node_modules/          # Ignore the frontend dependencies (if at root or any subfolder)
+dist/                  # Ignore the build output of the frontend
+build/                 # Another common build output folder
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables (CRITICAL for security)
+.env                   # Ignore the specific .env file
+.env.* # Ignore other variations like .env.development, .env.production, etc.
+
+# ML Models and Data (Highly Recommended - these are large generated files)
+# These now correctly refer to directories directly under the project root
+models/                # Ignore the entire 'models' directory (where your .pth and .json are saved)
+data/                  # Ignore the entire 'data' directory (where your PlantVillage dataset is)
+
+# Operating System specific files
+.DS_Store              # macOS specific
+Thumbs.db              # Windows specific
