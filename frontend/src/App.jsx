@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm'; // Import remarkGfm for GitHub Flavored Mark
 
 // IMPORTANT: Replace with your Render backend URL when deployed
 // For local development, keep it as localhost
-const BASE_API_URL = 'https://ai-problem-solver.onrender.com/';
+const BASE_API_URL = 'https://kunal339-ai-problem-solver-backend.hf.space/';
 
 function App() {
   const [selectedImage, setSelectedImage] = useState(null);
