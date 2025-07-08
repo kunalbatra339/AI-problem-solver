@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm'; // Import remarkGfm for GitHub Flavored Mark
 
 // IMPORTANT: Replace with your Render backend URL when deployed
 // For local development, keep it as localhost
-const BASE_API_URL = 'https://ai-problem-solver.onrender.com/'; 
+const BASE_API_URL = 'https://ai-problem-solver.onrender.com/';
 
 function App() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -16,6 +16,59 @@ function App() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+
+  // Helper function to resize the image before upload
+  const resizeImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_DIMENSION = 256; // Target max dimension (e.g., 256x256 for ResNet input)
+          let width = img.width;
+          let height = img.height;
+
+          // Calculate new dimensions while maintaining aspect ratio
+          if (width > height) {
+            if (width > MAX_DIMENSION) {
+              height *= MAX_DIMENSION / width;
+              width = MAX_DIMENSION;
+            }
+          } else {
+            if (height > MAX_DIMENSION) {
+              width *= MAX_DIMENSION / height;
+              height = MAX_DIMENSION;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Convert canvas content to a Blob (File-like object)
+          // Adjust quality (0.7 is a good balance for web)
+          canvas.toBlob((blob) => {
+            if (blob) {
+              // Create a new File object with the original name but resized content
+              const resizedFile = new File([blob], file.name, {
+                type: 'image/jpeg', // Force JPEG for smaller size, or use original file.type
+                lastModified: Date.now(),
+              });
+              resolve(resizedFile);
+            } else {
+              reject(new Error("Canvas to Blob conversion failed."));
+            }
+          }, 'image/jpeg', 0.7); // Output as JPEG with 70% quality
+        };
+        img.onerror = (err) => reject(new Error("Image loading failed: " + err.message));
+        img.src = event.target.result;
+      };
+      reader.onerror = (err) => reject(new Error("File reading failed: " + err.message));
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handleFileChange = (file) => {
     if (file && file.type.startsWith('image/')) {
@@ -63,18 +116,28 @@ function App() {
     setError(null);
     setResult(null);
 
-    const formData = new FormData();
-    formData.append('image', selectedImage);
-    formData.append('context', userContext);
-
     try {
+      // Resize the image before sending
+      const resizedImage = await resizeImage(selectedImage);
+
+      const formData = new FormData();
+      formData.append('image', resizedImage); // Append the resized image
+      formData.append('context', userContext);
+
       const response = await fetch(`${BASE_API_URL}/identify_issue`, {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        // Attempt to parse error data if available
+        let errorData = {};
+        try {
+          errorData = await response.json();
+        } catch (jsonError) {
+          // If JSON parsing fails, use a generic message
+          throw new Error(`HTTP error! status: ${response.status}. Could not parse error response.`);
+        }
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
@@ -99,9 +162,9 @@ function App() {
           Point. Detect. Get Solutions.
         </p>
 
-        <div 
-          className={`mb-6 p-4 rounded-xl border-2 border-dashed transition-all duration-300 ease-in-out 
-            ${isDragging ? 'border-teal-400 bg-gray-700/50' : 'border-gray-600 bg-gray-700'} 
+        <div
+          className={`mb-6 p-4 rounded-xl border-2 border-dashed transition-all duration-300 ease-in-out
+            ${isDragging ? 'border-teal-400 bg-gray-700/50' : 'border-gray-600 bg-gray-700'}
             ${imagePreview ? 'h-auto' : 'h-48 flex flex-col justify-center items-center'}`
           }
           onDragOver={handleDragOver}
@@ -194,7 +257,7 @@ function App() {
               <span>Identified Problem:</span>
             </h3>
             <p className="text-2xl font-bold text-white mb-3">{result.identified_problem}</p>
-            
+
             <h3 className="text-xl font-semibold mb-2 flex items-center space-x-2 text-emerald-400">
               <Lightbulb size={20} />
               <span>AI Solution:</span>
