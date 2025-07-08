@@ -3,7 +3,7 @@ title: AI Problem Solver Backend
 emoji: 💡
 colorFrom: teal
 colorTo: emerald
-sdk: flask
+sdk: docker
 app_file: app.py
 python_version: 3.12
 ---
